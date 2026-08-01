@@ -1,41 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicting Organic Search Traffic Decay | Research Paper</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #cbd5e1;
+            --code-bg: #1e293b;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.8;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 40px 20px;
+        }
 
-1. **Title + Abstract:**
-* *5-sentence structure:* **[Question]** Can machine learning predict organic traffic decay before severe impression loss occurs? **[Data]** Using $120,513$ content items from the [FlyRank Internship Warehouse](https://flyrank.ai), we engineered 15-day rolling performance features. **[Method]** We evaluated a Random Forest classifier against a heuristic baseline using a `GroupShuffleSplit` on `client_hash_id`. **[Result]** The Random Forest achieved an F1-score of $0.612$ vs. $0.325$ baseline on unseen domains ($2.8\times$ higher recall). **[Use]** Provides a decision-support queue for content refreshes while preventing false alarms on low-volume pages.
+        .paper-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 60px 80px;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
 
+        h1 {
+            font-size: 2.3rem;
+            color: var(--primary);
+            line-height: 1.3;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
 
-2. **Introduction / Problem Statement:**
-* Why manual auditing doesn't scale and why predicting organic search impression drops matters for content operations.
+        .author-line {
+            font-size: 1.05rem;
+            color: #64748b;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
 
+        .abstract-box {
+            background-color: #f1f5f9;
+            border-left: 5px solid var(--accent);
+            padding: 28px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 45px;
+        }
 
-3. **Data:**
-* Tables used (`fact_content_daily_performance`, `fact_content_query_90d`), date ranges (March 1–31, 2026), and public-safety verification (pseudonymized hash IDs, no raw PII or unaggregated queries).
+        .abstract-box h2 {
+            margin-top: 0;
+            font-size: 1.15rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            border-bottom: none;
+            padding-bottom: 0;
+        }
 
+        h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-top: 45px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            font-weight: 700;
+        }
 
-4. **Methodology:**
-* Target label definition (`imp_last15 < 0.8 * imp_prev15`), engineered features, heuristic baseline rules, and validation design (`GroupShuffleSplit` by `client_hash_id` to eliminate domain leakage).
+        h3 {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin-top: 25px;
+            font-weight: 600;
+        }
 
+        p, li {
+            font-size: 1.05rem;
+            text-align: justify;
+        }
 
-5. **Results:**
-* Model vs. baseline comparison table (Accuracy, Precision, Recall, F1-Score) and feature importance analysis.
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            font-size: 1rem;
+        }
 
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
 
-6. **Limitations & Honest Framing:**
-* Bounded claim language (*observed patterns, associated with, decision-support queue; non-causal*).
+        th {
+            background-color: #f8fafc;
+            color: var(--primary);
+            font-weight: 600;
+        }
 
+        .metric-highlight {
+            font-weight: 700;
+            color: var(--accent);
+        }
 
-7. **Ranked Recommendations (Action Playbook):**
-* Priority queue categories (`URGENT_REFRESH`, `MONITOR_VOLATILITY`, `PRUNE_OR_CONSOLIDATE`, `NO_ACTION`) and the **Automation No-Go List** (no automated AI rewrites or programmatic URL deletions).
+        .no-go-box {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
 
+        .no-go-box h3 {
+            color: #991b1b;
+            margin-top: 0;
+        }
 
-8. **Reproducibility:**
-* Links to executed notebooks (`w04_signal_audit.ipynb`, `w05_model.ipynb`, `w06_validation_audit.ipynb`, `w07_action_playbook.ipynb`) and repository random seeds.
+        .formula-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 16px 24px;
+            border-radius: 6px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95rem;
+            margin: 20px 0;
+        }
 
+        footer {
+            margin-top: 60px;
+            padding-top: 25px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            color: #64748b;
+            text-align: center;
+        }
 
-9. **Acknowledgments & Data Credit:**
-* Exact credit line: `"Built on the FlyRank ML Internship dataset"` linking directly to `[https://flyrank.ai](https://flyrank.ai)`.
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
 
+        a:hover {
+            text-decoration: underline;
+        }
 
+        @media (max-width: 768px) {
+            .paper-container {
+                padding: 30px 20px;
+            }
+            p, li {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
 
----
+<div class="paper-container">
 
+    <h1>Predicting Organic Search Traffic Decay: Machine Learning vs. Heuristic Baselines Across Multi-Client Portfolios</h1>
+    <div class="author-line">
+        By Ravindi Dhananjana &bull; Applied Machine Learning Research &bull; 2026
+    </div>
+
+    <!-- 1. Title + Abstract -->
+    <div class="abstract-box">
+        <h2>Abstract</h2>
+        <p>
+            <strong>[Question]</strong> Can machine learning models accurately predict content items at risk of organic search traffic decay before severe impression loss occurs? 
+            <strong>[Data]</strong> Using the <a href="https://flyrank.ai" target="_blank">FlyRank Internship Warehouse</a> dataset comprising daily Google Search Console performance and 90-day query dynamics across diverse client portfolios (120,513 content items), we engineered 15-day rolling performance features. 
+            <strong>[Method]</strong> We evaluated a Random Forest classifier against a rule-based heuristic baseline using an honest GroupShuffleSplit grouped by client ID (<code>client_hash_id</code>) to prevent cross-domain baseline leakage. 
+            <strong>[Result]</strong> The Random Forest model achieved superior recall (0.682 vs 0.241 baseline) and F1-score (0.612 vs 0.325) on unseen client domains, successfully identifying non-linear interactions between rank volatility and impression drops. 
+            <strong>[Use]</strong> These findings provide editorial teams with a robust decision-support prioritization queue for manual content refreshes while preventing false alarms on low-volume pages.
+        </p>
+    </div>
+
+    <!-- 2. Introduction / Problem Statement -->
+    <h2>1. Introduction & Problem Statement</h2>
+    <p>
+        Organic search traffic represents a foundational growth driver for digital enterprises. However, published content inherently decays over time—a phenomenon driven by search engine core algorithm updates, emerging competitor content, and evolving user search intent. 
+    </p>
+    <p>
+        In enterprise content operations managing thousands of URLs across multiple client domains, identifying which pages require editorial re-optimization presents a major operational bottleneck:
+    </p>
+    <ul>
+        <li><strong>The Exhaustion Problem:</strong> Exhaustive manual auditing across portfolios containing tens of thousands of URLs is cost-prohibitive and unscalable.</li>
+        <li><strong>The False Alarm Problem:</strong> Simple rule-based alerts (e.g., flagging any URL dropping &ge; 2 average positions) generate excessive false positives on low-volume long-tail pages, causing alert fatigue for content strategists.</li>
+    </ul>
+    <p>
+        This research addresses this challenge by formulating content decay prediction as a supervised classification task. We demonstrate how machine learning can flag URLs undergoing significant impression slumps across unseen web domains, enabling editorial teams to prioritize high-impact refresh campaigns.
+    </p>
+
+    <!-- 3. Data -->
+    <h2>2. Dataset & Public Safety Verification</h2>
+    <p>
+        The underlying empirical data was extracted from the <a href="https://flyrank.ai" target="_blank">FlyRank Internship Warehouse</a> using DuckDB analytical queries over Parquet storage.
+    </p>
+    
+    <h3>Data Schemas & Volume</h3>
+    <ul>
+        <li><code>fact_content_daily_performance</code>: Contains daily Google Search Console (GSC) metrics including impressions, clicks, average position, and CTR per URL.</li>
+        <li><code>fact_content_query_90d</code>: Aggregates 90-day keyword query distributions, visible query counts, and traffic concentration ratios per URL.</li>
+        <li><strong>Data Volume:</strong> 120,513 unique content items spanning diverse industry verticals.</li>
+    </ul>
+
+    <h3>Time Windows & Filtering</h3>
+    <p>
+        We defined two non-overlapping 15-day rolling evaluation windows in March 2026:
+    </p>
+    <ul>
+        <li><strong>Historical Feature Window (Prior Period):</strong> March 1, 2026 &ndash; March 15, 2026.</li>
+        <li><strong>Target Outcome Window (Last Period):</strong> March 16, 2026 &ndash; March 31, 2026.</li>
+    </ul>
+    <p>
+        <strong>Exclusion Filter:</strong> Content items with fewer than 10 total impressions in the prior period (<code>imp_prev15 &lt; 10</code>) were excluded from training and evaluation. This filter eliminates mathematical artifacts where low-volume pages (e.g., 2 impressions dropping to 0) skew percentage drop calculations.
+    </p>
+
+    <h3>Public Safety & Privacy Audit</h3>
+    <p>
+        To ensure public safety and data privacy, all records in the warehouse undergo anonymization:
+    </p>
+    <ul>
+        <li>Clients and individual URLs are identified solely via SHA-256 cryptographic hashes (<code>client_hash_id</code>, <code>content_hash_id</code>).</li>
+        <li>No raw Personally Identifiable Information (PII), client domain names, IP addresses, or unaggregated search strings are present in the publication datasets.</li>
+    </ul>
+
+    <!-- 4. Methodology -->
+    <h2>3. Methodology & Validation Design</h2>
+
+    <h3>Target Label Definition</h3>
+    <p>
+        We defined organic search decay as a binary flag (<code>is_declining &in; {0, 1}</code>), where a page experiences a post-period impression drop of at least 20% compared to its prior baseline:
+    </p>
+    <div class="formula-box">
+        is_declining = 1 IF (imp_last15 &lt; 0.8 * imp_prev15) ELSE 0
+    </div>
+
+    <h3>Feature Engineering</h3>
+    <p>For each content item, five predictive features were computed from prior performance windows:</p>
+    <ul>
+        <li><code>imp_prev15</code>: Sum of GSC impressions during the prior 15-day window.</li>
+        <li><code>pos_avg_prev</code>: Mean search position ranking during the prior 15-day window.</li>
+        <li><code>pos_std_prev</code>: Standard deviation of daily search position (quantifying rank volatility).</li>
+        <li><code>visible_queries</code>: Number of unique search queries for which the URL ranked in Google's top 100.</li>
+        <li><code>top_query_share</code>: The proportion of total impressions driven by the single highest-performing query.</li>
+    </ul>
+
+    <h3>Baseline Heuristic Model</h3>
+    <p>
+        We implemented a standard industry heuristic rule to serve as a comparative baseline: flag a URL as declining if it exhibits high rank volatility (<code>pos_std_prev &gt; 3.0</code>) and average position off Page 1 (<code>pos_avg_prev &gt; 10.0</code>).
+    </p>
+
+    <h3>Honest Validation Split (GroupShuffleSplit)</h3>
+    <p>
+        A critical error in cross-sectional web analytics is evaluating models using random row-level train/test splits. Because URLs belonging to the same client domain share domain authority, technical infrastructure, and macro-traffic baselines, random splitting causes severe domain-level data leakage.
+    </p>
+    <p>
+        To guarantee an honest evaluation, we employed <code>GroupShuffleSplit</code> grouped strictly by <code>client_hash_id</code> (75% Train / 25% Test). This ensures the test set consists entirely of unseen client domains, measuring true out-of-sample generalization.
+    </p>
+
+    <!-- 5. Results -->
+    <h2>4. Results & Performance Comparison</h2>
+    <p>
+        Both the Heuristic Baseline and the Random Forest Classifier were evaluated on the identical holdout test set comprising unseen client domains.
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Model / Baseline</th>
+                <th>Accuracy</th>
+                <th>Precision</th>
+                <th>Recall</th>
+                <th>F1-Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Heuristic Rule Baseline</strong></td>
+                <td>0.6214</td>
+                <td>0.5012</td>
+                <td>0.2410</td>
+                <td>0.3254</td>
+            </tr>
+            <tr>
+                <td><strong>Random Forest Classifier</strong></td>
+                <td class="metric-highlight">0.7842</td>
+                <td class="metric-highlight">0.5561</td>
+                <td class="metric-highlight">0.6823</td>
+                <td class="metric-highlight">0.6128</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p>
+        <strong>Key Performance Drivers:</strong> The Random Forest model achieved a <strong>2.8&times; increase in Recall</strong> ($0.2410 \rightarrow 0.6823$) over the heuristic baseline while maintaining higher overall precision. Permutation importance analysis revealed that <code>visible_queries</code> and <code>imp_prev15</code> were the strongest predictive drivers, showing that rank volatility alone is insufficient to forecast traffic slumps without traffic volume context.
+    </p>
+
+    <!-- 6. Limitations & Honest Framing -->
+    <h2>5. Limitations & Honest Framing</h2>
+    <p>
+        In accordance with honest claim principles, we explicitly delineate the boundaries of this research:
+    </p>
+    <ul>
+        <li><strong>Non-Causal Associations:</strong> This model identifies observational correlations between historical rank volatility and subsequent impression drops. It <em>does not prove causal decay</em> or guarantee that updating content will restore lost traffic.</li>
+        <li><strong>Channel Specificity:</strong> Features are derived strictly from Google Organic Search metrics. The model does not capture traffic shifts occurring in paid search campaigns, direct referral channels, or social media traffic.</li>
+        <li><strong>Macro-Market Noise:</strong> Global seasonality (e.g., holiday demand shifts) or industry-wide core algorithm updates can cause portfolio-wide impression drops that mimic individual content decay.</li>
+    </ul>
+
+    <!-- 7. Ranked Recommendations -->
+    <h2>6. Ranked Recommendations (Action Playbook)</h2>
+    <p>
+        Model output probabilities are mapped into a structured action queue to guide human editorial workflows:
+    </p>
+
+    <ol>
+        <li><strong><code>URGENT_REFRESH</code> (Priority 1):</strong> High-traffic URLs ($imp \ge 100$) experiencing severe impression slumps ($&gt;20\%$) and rank degradation ($\ge 2.0$ positions). Action: Priority editorial rewrite.</li>
+        <li><strong><code>MONITOR_VOLATILITY</code> (Priority 2):</strong> URLs exhibiting high position variance (<code>pos_std_prev &gt; 3.0</code>) without massive traffic loss yet. Action: Track SERP feature movements.</li>
+        <li><strong><code>PRUNE_OR_CONSOLIDATE</code> (Priority 3):</strong> Low-volume URLs ($imp &lt; 50$) showing steady decay. Action: Evaluate for 301 consolidation or removal.</li>
+        <li><strong><code>NO_ACTION</code> (Priority 4):</strong> Stable search performance.</li>
+    </ol>
+
+    <div class="no-go-box">
+        <h3>The Automation No-Go List</h3>
+        <p>To prevent catastrophic SEO regressions, the following actions are strictly prohibited from automated execution:</p>
+        <ul>
+            <li>🚫 <strong>NO Automated AI Content Overwrites:</strong> Never replace live URL content using automated LLM rewrites without human editorial review and approval.</li>
+            <li>🚫 <strong>NO Automated Programmatic Deletions/Redirects:</strong> Never automate URL deletions or 301 redirects programmatically based solely on model risk scores.</li>
+        </ul>
+    </div>
+
+    <!-- 8. Reproducibility -->
+    <h2>7. Reproducibility & Code Repositories</h2>
+    <p>
+        All data pipelines, SQL queries, feature engineering scripts, and model training routines are fully open-source in our code repository:
+    </p>
+    <ul>
+        <li><a href="https://github.com/ravindidhananjana/Internship-ML/blob/main/work/notebooks/w04_signal_audit.ipynb" target="_blank">Signal Audit Notebook (w04_signal_audit.ipynb)</a></li>
+        <li><a href="https://github.com/ravindidhananjana/Internship-ML/blob/main/work/notebooks/w05_model.ipynb" target="_blank">Model Training Notebook (w05_model.ipynb)</a></li>
+        <li><a href="https://github.com/ravindidhananjana/Internship-ML/blob/main/work/notebooks/w06_validation_audit.ipynb" target="_blank">Validation Audit Notebook (w06_validation_audit.ipynb)</a></li>
+        <li><a href="https://github.com/ravindidhananjana/Internship-ML/blob/main/work/notebooks/w07_action_playbook.ipynb" target="_blank">Action Playbook Notebook (w07_action_playbook.ipynb)</a></li>
+    </ul>
+
+    <!-- 9. Acknowledgments & Data Credit -->
+    <h2>8. Acknowledgments & Data Credit</h2>
+    <p>
+        Built on the <a href="https://flyrank.ai" target="_blank">FlyRank ML Internship dataset</a>.
+    </p>
+
+    <footer>
+        &copy; 2026 Ravindi Dhananjana &bull; Published via GitHub Pages
+    </footer>
+
+</div>
+
+</body>
+</html>
