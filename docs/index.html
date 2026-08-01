@@ -1,0 +1,41 @@
+
+
+1. **Title + Abstract:**
+* *5-sentence structure:* **[Question]** Can machine learning predict organic traffic decay before severe impression loss occurs? **[Data]** Using $120,513$ content items from the [FlyRank Internship Warehouse](https://flyrank.ai), we engineered 15-day rolling performance features. **[Method]** We evaluated a Random Forest classifier against a heuristic baseline using a `GroupShuffleSplit` on `client_hash_id`. **[Result]** The Random Forest achieved an F1-score of $0.612$ vs. $0.325$ baseline on unseen domains ($2.8\times$ higher recall). **[Use]** Provides a decision-support queue for content refreshes while preventing false alarms on low-volume pages.
+
+
+2. **Introduction / Problem Statement:**
+* Why manual auditing doesn't scale and why predicting organic search impression drops matters for content operations.
+
+
+3. **Data:**
+* Tables used (`fact_content_daily_performance`, `fact_content_query_90d`), date ranges (March 1–31, 2026), and public-safety verification (pseudonymized hash IDs, no raw PII or unaggregated queries).
+
+
+4. **Methodology:**
+* Target label definition (`imp_last15 < 0.8 * imp_prev15`), engineered features, heuristic baseline rules, and validation design (`GroupShuffleSplit` by `client_hash_id` to eliminate domain leakage).
+
+
+5. **Results:**
+* Model vs. baseline comparison table (Accuracy, Precision, Recall, F1-Score) and feature importance analysis.
+
+
+6. **Limitations & Honest Framing:**
+* Bounded claim language (*observed patterns, associated with, decision-support queue; non-causal*).
+
+
+7. **Ranked Recommendations (Action Playbook):**
+* Priority queue categories (`URGENT_REFRESH`, `MONITOR_VOLATILITY`, `PRUNE_OR_CONSOLIDATE`, `NO_ACTION`) and the **Automation No-Go List** (no automated AI rewrites or programmatic URL deletions).
+
+
+8. **Reproducibility:**
+* Links to executed notebooks (`w04_signal_audit.ipynb`, `w05_model.ipynb`, `w06_validation_audit.ipynb`, `w07_action_playbook.ipynb`) and repository random seeds.
+
+
+9. **Acknowledgments & Data Credit:**
+* Exact credit line: `"Built on the FlyRank ML Internship dataset"` linking directly to `[https://flyrank.ai](https://flyrank.ai)`.
+
+
+
+---
+
